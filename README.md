@@ -161,9 +161,9 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 
 ---
 
-## 📩 **Connect With Me**  
-📧 **Email:** [your-email@example.com](mailto:your-email@example.com)  
-🔗 **LinkedIn:** [Your LinkedIn Profile](https://linkedin.com/in/your-profile)  
-🌍 **GitHub:** [EvidenceM290](https://github.com/EvidenceM290)  
+## 📩 **Connect With Me**
+📧 **Email:** emadhume@smu.edu  
+🔗 **LinkedIn:** [LinkedIn](https://www.linkedin.com/in/evidence-madhume-874540204/)  
+🌍 **GitHub**: [EvidenceM290](https://github.com/EvidenceM290)  
 
 ---
