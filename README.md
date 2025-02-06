@@ -72,7 +72,7 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 ![Gender Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Gender%20Spend.png)
 
 #### **📌 Correlation Analysis**  
-- **Monthly Spend is negatively correlated with Average Price (-0.68)**  
+- **Monthly Spend is negatively correlated with Average Price (-0.22)**  
 - **Older customers tend to spend more** on coffee.  
 - **Enroll Promo Value** affects spending **positively**, suggesting **loyalty incentives work**.  
 
