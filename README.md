@@ -1,7 +1,7 @@
 
 ---
 
-### 📌 **README.md for Starbucks Pricing Analysis Project**  
+### 📌 ** Starbucks Pricing Analysis Project**  
 **By Evidence Madhume**  
 
 ---
