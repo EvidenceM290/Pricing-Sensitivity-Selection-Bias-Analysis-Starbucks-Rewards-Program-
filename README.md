@@ -30,20 +30,7 @@ Pricing-Analysis-Starbucks/
 │── README.md                  <- Project documentation.
 │── requirements.txt           <- Dependencies for running the project.
 ```
----
 
-## 🔧 **How to Run the Project**  
-
-### 1️⃣ Clone the Repository  
-```sh
-git clone https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program.git
-cd Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program
-```
-
-### 2️⃣ Install Required Libraries  
-```sh
-pip install -r requirements.txt
-```
 ---
 
 ## 🔍 **Exploratory Data Analysis (EDA)**  
@@ -71,7 +58,7 @@ EDA was conducted to **understand customer spending patterns**, **detect missing
 #### **📌 Monthly Spending Distribution**  
 Most customers spend **between $18-$46 per month**, while a few **outliers exceed $200**.  
 
-![Monthly Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Monthly%20Spend%20Distribution.png)
+![Monthly Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Monthly%20Spend.png)
 
 #### **📌 Average Price Distribution**  
 - Prices follow a normal distribution.  
@@ -83,7 +70,7 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 - **Female customers** spend significantly **more than male customers**.  
 - The **spending distribution skews higher** for female customers.  
 
-![Gender Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Gender%20Spending.png)
+![Gender Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Gender%20Spend.png)
 
 #### **📌 Correlation Analysis**  
 - **Monthly Spend is negatively correlated with Average Price (-0.68)**  
@@ -113,7 +100,7 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 - **Revenue Loss Projection:** The **corrected model predicts higher revenue losses**, indicating that ignoring selection bias could lead to overly aggressive pricing strategies.
 
 **Revenue Loss Comparison:**  
-![Revenue Loss](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Revenue_Loss_Comparison.png)
+![Revenue Loss](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Revenue%20Loss.png)
 
 ---
 
@@ -122,7 +109,7 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 - **Gender Impact:** **Female customers spend 5.96 times more** than male customers, making them high-value targets for promotions.  
 
 **Spend by Enrollment Status:**  
-![Spend by Enrollment](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Monthly_Spend_by_Enrollment.png)
+![Spend by Enrollment](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Spend%20by%20Enrollment.png)
 
 ---
 
