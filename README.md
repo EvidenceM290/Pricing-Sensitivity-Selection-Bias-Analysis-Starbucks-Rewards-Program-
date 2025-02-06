@@ -118,7 +118,15 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 - **Ignoring selection bias leads to underestimating price elasticity**, which can cause **incorrect pricing decisions and revenue loss**.  
 
 **Heckman Selection Model (Corrected):**  
-![Heckman Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Heckman_Correction.png)
+### Regression Model Summary (With Enrollment Correction)
+
+| Variable          | Estimate  | Std. Error | t value | p value        |
+|------------------|-----------|------------|--------|----------------|
+| (Intercept)      | 6.50       | 0.14        | 45.69   | < 2e-16 ***     |
+| log_avgPrice     | -2.13      | 0.07        | -29.20  | < 2e-16 ***     |
+| age              | 0.01       | 0.00        | 8.64    | < 2e-16 ***     |
+| female           | 1.96       | 0.03        | 73.90   | < 2e-16 ***     |
+| predicted_enroll | -2.33      | 0.06        | -37.33  | < 2e-16 ***     |
 
 ---
 
@@ -127,7 +135,13 @@ Most customers spend **between $18-$46 per month**, while a few **outliers excee
 - **Price Coefficient: -2.14 → Strongest impact of pricing on demand.**  
 
 **Polynomial Model Summary:**  
-![Polynomial Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Polynomial_Correction.png)
+| Variable             | Estimate  | Std. Error | t value | p value        |
+|---------------------|-----------|------------|--------|----------------|
+| (Intercept)         | 6.56       | 0.14        | 46.05   | < 2e-16 ***     |
+| log_avgPrice        | -2.14      | 0.07        | -29.39  | < 2e-16 ***     |
+| age                 | 0.01       | 0.00        | 8.83    | < 2e-16 ***     |
+| female              | 1.96       | 0.03        | 74.25   | < 2e-16 ***     |
+| predicted_enroll_poly | -2.41      | 0.06        | -37.63  | < 2e-16 ***     |
 
 ---
 
