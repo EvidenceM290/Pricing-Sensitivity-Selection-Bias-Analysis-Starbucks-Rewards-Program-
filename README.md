@@ -1,4 +1,3 @@
-I've updated the **README.md** file to include the correct **image links** from your **GitHub repository**. 🚀  
 
 ---
 
