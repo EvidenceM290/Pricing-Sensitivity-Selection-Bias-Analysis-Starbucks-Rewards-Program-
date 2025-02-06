@@ -1,19 +1,25 @@
-### 📌 **Pricing Sensitivity & Selection Bias Analysis (Starbucks Rewards Program)**
----
-
-## 🔍 **Project Overview**
-This project analyzes **customer spending behavior and price sensitivity** in Starbucks’ **loyalty program** using **log-log regression models, Heckman selection correction, and machine learning techniques (Random Forest, Polynomial Regression).** The study corrects for **selection bias**, ensuring accurate **price elasticity estimates** and optimal **pricing strategies**.
-
----
-## 🎯 **Business Objectives**
-✅ **Estimate true price elasticity** of demand while accounting for selection bias.  
-✅ **Understand customer spending patterns** by age, gender, and enrollment status.  
-✅ **Optimize pricing decisions** using robust predictive models.  
-✅ **Quantify revenue loss estimates** under biased and corrected models.  
 
 ---
 
-## 📂 **Project Structure**
+### 📌 **README.md for Starbucks Pricing Analysis Project**  
+**By Evidence Madhume**  
+
+---
+
+## 📌 **Project Overview**  
+This project investigates **customer spending patterns and price sensitivity** in the **Starbucks Rewards Program**, focusing on **correcting selection bias** in price elasticity estimates. The analysis leverages **log-log regression, Heckman selection correction, Polynomial Regression, and Random Forest models** to provide **data-driven insights for pricing strategies and revenue optimization**.
+
+---
+
+## 🎯 **Business Objectives**  
+✅ **Accurately estimate price elasticity** while accounting for selection bias.  
+✅ **Understand customer spending behavior** by age, gender, and loyalty enrollment status.  
+✅ **Optimize pricing strategies** based on refined model predictions.  
+✅ **Quantify revenue loss estimates** under biased vs. corrected models.  
+
+---
+
+## 📂 **Project Structure**  
 ```
 Pricing-Analysis-Starbucks/
 │── data/                      <- Raw and processed data files.
@@ -25,97 +31,125 @@ Pricing-Analysis-Starbucks/
 ```
 ---
 
-## 🔧 **How to Run the Project**
-
-### 1️⃣ Clone the Repository
-```sh
-git clone https://github.com/EvidenceM290/Pricing-Analysis-Starbucks.git
-cd Pricing-Analysis-Starbucks
-```
-
-### 2️⃣ Install Required Libraries
-```sh
-pip install -r requirements.txt
-```
 ---
-## 📊 **Exploratory Data Analysis (EDA)**
 
-### 📌 **Revenue Loss Comparison (Biased vs. Corrected Model)**
-- **The uncorrected model underestimates revenue loss** from price hikes.  
-- **The corrected model (Polynomial) predicts higher losses, showing greater price sensitivity.**
+## 🔍 **Exploratory Data Analysis (EDA)**  
 
-![Revenue Loss Comparison](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Revenue%20Loss%20Comparison.png)
+EDA was conducted to **understand customer spending patterns**, **detect missing values**, and **identify outliers** before model training.  
 
-### 📌 **Customer Spending Behavior**
-- **Female customers spend 5.96 times more** than male customers.
-- **Older customers increase spending by ~1.11% per year.**
+### 🛠 **1. Data Cleaning & Preprocessing**  
+- **Missing Values:** Checked and handled appropriately.  
+- **Duplicates:** Removed from the dataset to avoid redundancy.  
+- **Outliers:**  
+  - **Monthly Spend** was **capped at the 95th percentile** to prevent extreme values from skewing results.  
+  - **Average Price** outliers were identified using the **IQR method** and replaced with the mean.  
 
-![Spend by Enrollment](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Monthly%20Spend%20by%20Enrollment.png)
+### 📊 **2. Descriptive Statistics**  
+| Variable               | Min | 25%  | 50%  | 75%  | Max |
+|------------------------|-----|------|------|------|-----|
+| Monthly Spend (USD)    | 5.2 | 18.3 | 29.5 | 45.6 | 200.0 |
+| Average Price (USD)    | 1.8 | 3.2  | 4.5  | 5.8  | 7.5 |
+| Customer Age (years)   | 18  | 24   | 32   | 42   | 65  |
 
 ---
-## 🏗 **Model Development**
 
-### 📌 **Baseline Log-Log Regression Model**
-- **Price Coefficient:** **-1.79** → A **1% price increase** leads to a **1.79% drop** in spending.
-- **Adjusted R²:** **0.5676**
-- **Significance:** **p < 2e-16 (Highly significant)**
+### 📈 **3. Data Visualization Insights**  
 
-![Baseline Model Summary](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Baseline%20Model.png)
+#### **📌 Monthly Spending Distribution**  
+Most customers spend **between $18-$46 per month**, while a few **outliers exceed $200**.  
 
----
-### 📌 **Correcting Selection Bias (Heckman Model)**
-- **Problem:** Starbucks only collects detailed data from **loyalty members** (selection bias).  
-- **Solution:** **Heckman Two-Step Correction** predicts selection probability & adjusts estimates.  
-- **Result:** The corrected **price elasticity increases to -2.13** (greater price sensitivity).  
+![Monthly Spend](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Monthly_Spend_Distribution.png)
 
-![Heckman Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Heckman%20Correction.png)
+#### **📌 Average Price Distribution**  
+- Prices follow a normal distribution.  
+- The **most common coffee price is around $4.5**, with few stores charging above $7.  
 
----
-### 📌 **Best Model: Polynomial Regression**
-- **Highest Adjusted R²** (**0.7039**) → Most **accurate prediction of customer behavior.**  
-- **Price Coefficient: -2.14** → **A 1% price increase = 2.14% decrease in spending.**  
+![Price Distribution](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Price_Distribution.png)
 
-![Polynomial Model Summary](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Polynomial%20Correction.png)
+#### **📌 Gender-Based Spending Behavior**  
+- **Female customers** spend significantly **more than male customers**.  
+- The **spending distribution skews higher** for female customers.  
 
----
-### 📌 **Random Forest Model (Alternative Approach)**
-- **Predicts enrollment likelihood more accurately** than linear models.  
-- **However, results show higher variance compared to Polynomial Regression.**  
+![Gender Spend](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Gender_Spending.png)
 
-![Random Forest Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Random%20Forest%20Correction.png)
+#### **📌 Correlation Analysis**  
+- **Monthly Spend is negatively correlated with Average Price (-0.68)**  
+- **Older customers tend to spend more** on coffee.  
+- **Enroll Promo Value** affects spending **positively**, suggesting **loyalty incentives work**.  
+
+![Correlation Matrix](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Correlation_Matrix.png)
 
 ---
-### 📌 **Residual Plot Comparison (Model Performance)**
-- The **Polynomial Model has the best fit**, reducing bias.  
-- The **Random Forest model shows higher variance**, suggesting overfitting risk.  
 
-![Residual Plots](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Residual%20Plot%20Comparison.png)
+## 📊 **Key Findings**  
 
----
-## 📌 **Business Implications & Strategic Recommendations**
-### 🔹 **1. Data-Driven Pricing Strategy**
-✔ **Use the Polynomial Model** for **more accurate pricing decisions.**  
-✔ **Adjust prices carefully**, since customers **are highly price-sensitive (-2.14 elasticity).**  
+### 📌 **Model Comparison Summary**  
 
-### 🔹 **2. Customer Segmentation for Targeted Marketing**
-✔ **Female customers** spend significantly more. **Target promotions to increase retention.**  
-✔ **Older customers** have a **higher lifetime value** – adjust loyalty rewards accordingly.  
+| Model         | Price Coefficient | p-value (Price) | Adjusted R² | AIC    | BIC    | MSE    |
+|--------------|------------------|----------------|-------------|--------|--------|--------|
+| **Baseline**  | -1.79            | < 2e-16 ***    | 0.5676      | 7541.98 | 7572.14 | 0.7742 |
+| **Polynomial** | -2.14            | < 2e-16 ***    | 0.7039      | 6920.85 | 6957.05 | 0.5302 |
 
-### 🔹 **3. Revenue Optimization**
-✔ **Avoid aggressive price increases** – they could drive away price-sensitive customers.  
-✔ **Introduce targeted price discounts** to maximize revenue from different customer groups.  
+📌 **A small p-value (<0.05) confirms that price strongly impacts customer spending.**  
 
 ---
-## 📌 **Final Takeaways**
-✅ **Correcting selection bias is critical** – the uncorrected model **underestimates price sensitivity.**  
-✅ **The best model (Polynomial Regression) reveals a stronger impact of pricing on demand.**  
-✅ **Starbucks should use targeted promotions** to **retain high-value customers and optimize revenue.**  
+
+### 📌 **1. Price Sensitivity & Revenue Loss**  
+- **Baseline Model:** Estimated price elasticity of **-1.79**, meaning a **1% price increase results in a 1.79% decrease** in monthly spending.  
+- **Polynomial Model (Corrected):** Price elasticity **increases to -2.14**, meaning **a 1% price increase leads to a 2.14% decrease** in spending.  
+- **Revenue Loss Projection:** The **corrected model predicts higher revenue losses**, indicating that ignoring selection bias could lead to overly aggressive pricing strategies.
+
+**Revenue Loss Comparison:**  
+![Revenue Loss](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Revenue_Loss_Comparison.png)
 
 ---
-## 📩 **Connect With Me**
+
+### 📌 **2. Customer Spending Behavior**  
+- **Age Impact:** Older customers spend **1.11% more** per additional year.  
+- **Gender Impact:** **Female customers spend 5.96 times more** than male customers, making them high-value targets for promotions.  
+
+**Spend by Enrollment Status:**  
+![Spend by Enrollment](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Monthly_Spend_by_Enrollment.png)
+
+---
+
+### 📌 **3. Selection Bias in Pricing Models**  
+- **Loyalty program customers are less price-sensitive** than the general population.  
+- **Ignoring selection bias leads to underestimating price elasticity**, which can cause **incorrect pricing decisions and revenue loss**.  
+
+**Heckman Selection Model (Corrected):**  
+![Heckman Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Heckman_Correction.png)
+
+---
+
+### 📌 **4. Best Model: Polynomial Regression**  
+- **Best Adjusted R² (0.7039) → Most accurate in predicting customer behavior.**  
+- **Price Coefficient: -2.14 → Strongest impact of pricing on demand.**  
+
+**Polynomial Model Summary:**  
+![Polynomial Model](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Polynomial_Correction.png)
+
+---
+
+## 📌 **Business Implications & Strategic Recommendations**  
+
+### 🔹 **1. Data-Driven Pricing Strategy**  
+✔ **Use the Polynomial Model** for pricing decisions as it provides the most accurate **price elasticity estimates.**  
+✔ **Avoid aggressive price hikes** to minimize **customer churn risk.**  
+
+### 🔹 **2. Targeted Marketing & Promotions**  
+✔ **Female customers are high-value spenders** – prioritize engagement through **exclusive promotions.**  
+✔ **Older customers** respond well to **loyalty incentives**, driving **higher retention.**  
+
+### 🔹 **3. Revenue Optimization**  
+✔ **Introduce regional price adjustments** based on **demographic spending behavior.**  
+✔ **Use strategic discounts** for high-price-sensitive customers to **maximize revenue without excessive churn.**  
+
+---
+
+## 📩 **Connect With Me**  
 📧 **Email:** [your-email@example.com](mailto:your-email@example.com)  
 🔗 **LinkedIn:** [Your LinkedIn Profile](https://linkedin.com/in/your-profile)  
 🌍 **GitHub:** [EvidenceM290](https://github.com/EvidenceM290)  
 
 ---
-
