@@ -1,7 +1,8 @@
+I've updated the **README.md** file to include the correct **image links** from your **GitHub repository**. 🚀  
 
 ---
 
-### 📌 **Starbucks Pricing Analysis Project**  
+### 📌 **README.md for Starbucks Pricing Analysis Project**  
 **By Evidence Madhume**  
 
 ---
@@ -31,6 +32,18 @@ Pricing-Analysis-Starbucks/
 ```
 ---
 
+## 🔧 **How to Run the Project**  
+
+### 1️⃣ Clone the Repository  
+```sh
+git clone https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program.git
+cd Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program
+```
+
+### 2️⃣ Install Required Libraries  
+```sh
+pip install -r requirements.txt
+```
 ---
 
 ## 🔍 **Exploratory Data Analysis (EDA)**  
@@ -58,26 +71,26 @@ EDA was conducted to **understand customer spending patterns**, **detect missing
 #### **📌 Monthly Spending Distribution**  
 Most customers spend **between $18-$46 per month**, while a few **outliers exceed $200**.  
 
-![Monthly Spend](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Monthly_Spend_Distribution.png)
+![Monthly Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Monthly%20Spend%20Distribution.png)
 
 #### **📌 Average Price Distribution**  
 - Prices follow a normal distribution.  
 - The **most common coffee price is around $4.5**, with few stores charging above $7.  
 
-![Price Distribution](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Price_Distribution.png)
+![Price Distribution](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Price%20Distribution.png)
 
 #### **📌 Gender-Based Spending Behavior**  
 - **Female customers** spend significantly **more than male customers**.  
 - The **spending distribution skews higher** for female customers.  
 
-![Gender Spend](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Gender_Spending.png)
+![Gender Spend](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Gender%20Spending.png)
 
 #### **📌 Correlation Analysis**  
 - **Monthly Spend is negatively correlated with Average Price (-0.68)**  
 - **Older customers tend to spend more** on coffee.  
 - **Enroll Promo Value** affects spending **positively**, suggesting **loyalty incentives work**.  
 
-![Correlation Matrix](https://github.com/EvidenceM290/Pricing-Analysis-Starbucks/blob/main/images/Correlation_Matrix.png)
+![Correlation Matrix](https://github.com/EvidenceM290/Pricing-Sensitivity-Selection-Bias-Analysis-Starbucks-Rewards-Program-/blob/main/images/Correlation%20Matrix.png)
 
 ---
 
