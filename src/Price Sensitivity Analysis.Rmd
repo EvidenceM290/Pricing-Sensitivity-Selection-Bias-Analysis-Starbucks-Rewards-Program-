@@ -1,0 +1,576 @@
+---
+title: "MAST6251 HW2"
+author: "Evidence Madhume"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+  always_allow_html: true
+date: "2025-01-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(janitor) # For data cleaning
+library(skimr) # For summary statistics
+library(car)
+library(sampleSelection)
+library(gridExtra)
+library(htmlwidgets)
+
+```
+
+
+## 1. Load the Data
+
+```{r}
+
+# Read in the datasets
+transaction_data <- read_delim("sbux_transaction.txt", delim = " ")
+survey_data <- read_delim("sbux_survey.txt", delim = " ")
+
+
+```
+
+
+## 2. Explanatory Data Analysis
+
+```{r cars}
+# Check missing values
+sum(is.na(transaction_data))
+sum(is.na(survey_data))
+
+# Remove duplicates if any
+transaction_data <- transaction_data %>% distinct()
+survey_data <- survey_data %>% distinct()
+
+
+```
+```{r}
+
+# Inspect structure and summary
+glimpse(transaction_data)
+
+```
+
+## Descriptive Statistics for transaction data
+```{r}
+# Summary of numerical variables
+transaction_data %>%
+  select(monthlySpend, avgPrice, age, enrollPromoValue) %>%
+  summary()
+
+# Visualizing distributions
+ggplot(transaction_data, aes(x = monthlySpend)) + 
+  geom_histogram(binwidth = 10, fill = "blue", alpha = 0.5) + 
+  labs(title = "Distribution of Monthly Spend")
+
+ggplot(transaction_data, aes(x = avgPrice)) + 
+  geom_density(fill = "green", alpha = 0.5) + 
+  labs(title = "Density Plot of Average Price")
+
+# Boxplot for outliers
+ggplot(transaction_data, aes(y = monthlySpend)) + 
+  geom_boxplot(fill = "red", alpha = 0.5) + 
+  labs(title = "Boxplot of Monthly Spend")
+
+```
+# Gender distribution
+```{r}
+# Gender distribution
+transaction_data %>%
+  count(female) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+ggplot(transaction_data, aes(x = as.factor(female), fill = as.factor(female))) +
+  geom_bar() +
+  labs(title = "Gender Distribution", x = "Female (1 = Yes, 0 = No)", y = "Count")
+
+# Distribution of enrollPromoValue
+ggplot(transaction_data, aes(x = enrollPromoValue)) +
+  geom_histogram(binwidth = 5, fill = "purple", alpha = 0.5) +
+  labs(title = "Distribution of Enrollment Promotion Value")
+
+```
+
+# Correlation Analysis
+
+```{r}
+# Correlation matrix
+cor_matrix <- cor(transaction_data %>% select(monthlySpend, avgPrice, age, enrollPromoValue))
+print(cor_matrix)
+
+# Scatter plot to visualize correlation
+ggplot(transaction_data, aes(x = avgPrice, y = monthlySpend)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Monthly Spend vs Average Price")
+
+```
+## EDA for survey_data
+```{r}
+# Summary of numerical variables
+survey_data %>%
+  select(age, enrollPromoValue) %>%
+  summary()
+
+# Visualizing distributions
+ggplot(survey_data, aes(x = age)) + 
+  geom_histogram(binwidth = 5, fill = "blue", alpha = 0.5) + 
+  labs(title = "Age Distribution of Survey Respondents")
+
+ggplot(survey_data, aes(x = enrollPromoValue)) + 
+  geom_density(fill = "green", alpha = 0.5) + 
+  labs(title = "Density Plot of Enrollment Promo Value")
+
+```
+
+## Categorical Analysis
+```{r}
+# Enrollment distribution
+survey_data %>%
+  count(enroll) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+ggplot(survey_data, aes(x = as.factor(enroll), fill = as.factor(enroll))) +
+  geom_bar() +
+  labs(title = "Enrollment Status Distribution", x = "Enrolled (1 = Yes, 0 = No)", y = "Count")
+
+# Gender distribution
+survey_data %>%
+  count(female) %>%
+  mutate(percentage = n / sum(n) * 100)
+
+ggplot(survey_data, aes(x = as.factor(female), fill = as.factor(female))) +
+  geom_bar() +
+  labs(title = "Gender Distribution in Survey", x = "Female (1 = Yes, 0 = No)", y = "Count")
+
+```
+
+### Handling Outliers for Monthly Spend and Average Price
+
+```{r}
+
+# Define outlier threshold for avgPrice using the interquartile range (IQR) method
+Q1 <- quantile(transaction_data$avgPrice, 0.25, na.rm = TRUE)
+Q3 <- quantile(transaction_data$avgPrice, 0.75, na.rm = TRUE)
+IQR_value <- Q3 - Q1
+
+# Define bounds for outliers
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+# Set outliers to NA in avgPrice
+transaction_data <- transaction_data %>%
+  mutate(avgPrice = ifelse(avgPrice < lower_bound | avgPrice > upper_bound, NA, avgPrice))
+
+# Handling missing values for avgPrice using mean imputation
+transaction_data <- transaction_data %>%
+  mutate(avgPrice = ifelse(is.na(avgPrice), mean(avgPrice, na.rm = TRUE), avgPrice))
+
+# Handling outliers for monthlySpend using capping (95th percentile)
+upper_limit_spend <- quantile(transaction_data$monthlySpend, 0.95, na.rm = TRUE)
+transaction_data <- transaction_data %>%
+  mutate(monthlySpend = ifelse(monthlySpend > upper_limit_spend, upper_limit_spend, monthlySpend))
+
+# Boxplot after handling outliers in monthlySpend
+ggplot(transaction_data, aes(x = "", y = monthlySpend)) +
+  geom_boxplot(fill = "red", alpha = 0.5) +
+  labs(title = "Boxplot of Monthly Spend (Outliers Capped)")
+
+# Density plot of avgPrice to visualize normality after imputation
+ggplot(transaction_data, aes(x = avgPrice)) +
+  geom_boxplot(fill = "green", alpha = 0.5) +
+  labs(title = "Density Plot of Average Price (After Outlier Handling & Imputation)")
+
+```
+
+
+
+##  Log transformation of variables
+```{r}
+transaction_data <- transaction_data %>%
+  mutate(log_monthlySpend = log(monthlySpend),
+         log_avgPrice = log(avgPrice))
+
+```
+
+
+
+
+##  Step 1: Baseline log-log regression model
+
+```{r}
+baseline_model <- lm(log_monthlySpend ~ log_avgPrice + age + female , data = transaction_data)
+
+# Summary of baseline model
+summary(baseline_model)
+```
+
+---
+
+### **Interpretation of Price Coefficient (Price Elasticity)**
+
+The coefficient of `log_avgPrice` is **-1.79**, meaning that **for every 1% increase in the average latte price, the expected monthly spend by a customer decreases by approximately 1.79%.** This indicates that demand is **price elastic**, suggesting customers are sensitive to changes in price.
+
+---
+
+### Model Summary for Management
+
+1. **Key Findings:**
+   - **Price Sensitivity:** A price increase leads to a significant drop in customer spending. The analysis shows that for every **1%** increase in the average latte price, the expected monthly spend decreases by approximately **1.79%**.
+   - **Customer Characteristics Matter:**
+     - **Age:** Older customers tend to spend slightly more, with a small positive impact of 0.83% per additional year.
+     - **Gender:** Female customers tend to spend significantly more than male customers, with an increase of approximately **566.24%** in monthly spend.
+  
+2. **Model Performance:**
+   - The model explains **56.76%** of the variation in customer spending, which is a strong indication of its reliability.
+   - The results are statistically significant, meaning the relationships observed are unlikely to be due to chance.
+
+---
+
+### **Business Implications:**
+- Starbucks may need to **re-evaluate pricing strategies** to balance price changes and revenue goals.
+- **Targeted marketing efforts** could be designed for different customer segments based on gender and age, as these factors influence spending habits.
+
+---
+
+
+
+# Step 2: Heckman selection correction - Probit model
+
+```{r}
+heckman_step1 <- glm(enroll ~ age + female + enrollPromoValue, data = survey_data, family = binomial(link = "probit"))
+
+```
+
+
+# Predict enrollment probability using Probit model
+
+```{r}
+transaction_data <- transaction_data %>%
+  mutate(predicted_enroll = predict(heckman_step1, newdata = transaction_data, type = "response"))
+
+
+heckman_model <- lm(log_monthlySpend ~ log_avgPrice + age + female + predicted_enroll, data = transaction_data)
+
+# Summary of Heckman model
+summary(heckman_model)
+
+```
+
+
+The comparison of the two models highlights the presence of selection bias in the estimation of price elasticity, which has significant implications at the corporate level. In the baseline model, the price elasticity coefficient of -1.7861 suggests that a 1% increase in price would lead to a 1.79% decrease in monthly spend. However, after applying the heckaman two step correction using the predicted enrollment probability, the coefficient drops further to -2.1278, suggesting a greater price sensitivity where a 1% increase in price results in a 2.13% decrease in monthly spend. This means that price sensitivity is greater than the initial estimate. This bias matters because it indicates that customers in the loyalty program, who were the focus of the initial analysis, are less price-sensitive compared to the general customer base. As a result, relying on the uncorrected model could lead to overconfident pricing strategies that underestimate the true impact of price increases on revenue.
+
+At the corporate level, with thousands of Starbucks locations worldwide, even a small miscalculation in price sensitivity can have substantial financial implications. If the company underestimates price sensitivity, it may implement price hikes that drive away a significant portion of customers, leading to lower foot traffic and revenue loss across multiple locations. Conversely, if the corrected model is used, Starbucks can make more informed pricing decisions that align with customer behavior and market realities, ultimately optimizing profitability while maintaining customer loyalty.
+
+
+In conclusion, recognizing and addressing selection bias is crucial for Starbucks' long-term profitability. By incorporating bias corrections into their pricing models, Starbucks can achieve a more accurate understanding of customer demand, implement targeted pricing strategies, and ultimately enhance revenue performance across its vast network of stores.
+
+## Polynomial Regression for Enrollment Prediction
+
+```{r}
+library(caret)
+
+# Ensure polynomial terms exist in both datasets
+survey_data <- survey_data %>%
+  mutate(age_sq = age^2, enrollPromoValue_sq = enrollPromoValue^2)
+
+transaction_data <- transaction_data %>%
+  mutate(age_sq = age^2, enrollPromoValue_sq = enrollPromoValue^2)
+
+# Fit a polynomial regression model using survey data
+poly_model <- glm(enroll ~ age + age_sq + female + enrollPromoValue + enrollPromoValue_sq, 
+                  data = survey_data, family = binomial(link = "probit"))
+
+# Predict probabilities on the transaction dataset
+transaction_data$predicted_enroll_poly <- predict(poly_model, newdata = transaction_data, type = "response")
+
+# Second stage regression with polynomial correction
+heckman_poly_model <- lm(log_monthlySpend ~ log_avgPrice + age + female + predicted_enroll_poly, 
+                         data = transaction_data)
+
+# Summary of the Heckman model with polynomial features
+summary(heckman_poly_model)
+
+
+```
+
+The comparison of the four models highlights the critical importance of addressing selection bias in estimating price elasticity, which has significant implications for Starbucks. The baseline model estimates a price elasticity coefficient of **-1.7861**, meaning a 1% price increase would lead to a **1.79% decrease** in monthly spending. However, advanced correction models, such as the Heckman, Random Forest, and Polynomial corrections, suggest stronger price sensitivity, with the Polynomial Correction model showing the highest elasticity at **-2.1369**, indicating a **2.14% decrease** in spending for every 1% price increase. This suggests that the baseline model underestimates the impact of pricing changes, reinforcing the need for a more robust approach.
+
+At the corporate level, even minor errors in price sensitivity estimation can lead to significant financial risks across Starbucks' vast network. Over-reliance on the uncorrected model could result in overly aggressive pricing strategies that may drive away price-sensitive customers, reducing foot traffic and revenue. The corrected models provide a more accurate reflection of customer behavior, with the **Polynomial model** emerging as the most reliable, given its highest **Adjusted R-squared (0.7039)** and lowest **AIC (6920.855)** and **BIC (6957.045)** values. These metrics indicate a better fit with minimal complexity, making it a strong candidate for future pricing strategies.
+
+In conclusion, Starbucks should adopt the Polynomial Correction model to refine its pricing decisions. This model provides a more accurate assessment of customer demand and price sensitivity, enabling the company to optimize pricing strategies and minimize revenue loss. Leveraging these insights can help Starbucks maintain competitive pricing while enhancing profitability and customer retention across all store locations.
+
+
+```{r}
+library(randomForest)
+
+# Prepare data for random forest
+survey_data_rf <- survey_data %>%
+  select(enroll, age, female, enrollPromoValue) %>%
+  mutate(enroll = as.factor(enroll))
+
+# Train a random forest model
+rf_model <- randomForest(enroll ~ age + female + enrollPromoValue, data = survey_data_rf, ntree = 500)
+
+# Predict probabilities using the random forest model
+transaction_data$predicted_enroll_rf <- predict(rf_model, newdata = transaction_data, type = "prob")[,2]
+
+# Second stage regression with random forest correction
+heckman_rf_model <- lm(log_monthlySpend ~ log_avgPrice + age + female + predicted_enroll_rf, 
+                       data = transaction_data)
+
+# Summary of the Heckman model with random forest predictions
+summary(heckman_rf_model)
+
+```
+The comparison between the baseline and the Random Forest correction model reveals the importance of addressing selection bias in estimating price elasticity. In the baseline model, the price coefficient of -1.79 suggests that a 1% increase in price leads to a 1.79% decrease in monthly spending. However, after applying the Random Forest correction, the price coefficient changes to -2.13, indicating a 2.13% decrease in spending for every 1% price increase. This suggests that the baseline model underestimates the true impact of pricing changes, reinforcing the need for more robust models that account for customer self-selection
+
+
+## Residual Plot Comparison
+
+```{r}
+transaction_filtered <- transaction_data %>% 
+  filter(id %in% survey_data$id) %>%
+  mutate(
+    age_sq = age^2,
+    enrollPromoValue_sq = enrollPromoValue^2
+  )
+
+# Calculate fitted values and residuals for the Baseline model
+transaction_filtered$baseline_fitted <- predict(baseline_model, newdata = transaction_filtered)
+transaction_filtered$baseline_residuals <- transaction_filtered$log_monthlySpend - transaction_filtered$baseline_fitted
+
+# Calculate fitted values and residuals for the Polynomial Correction model
+transaction_filtered$poly_fitted <- predict(poly_model, newdata = transaction_filtered)
+transaction_filtered$poly_residuals <- transaction_filtered$log_monthlySpend - transaction_filtered$poly_fitted
+
+# Calculate fitted values and residuals for the Random Forest model
+transaction_filtered$rf_fitted <- predict(heckman_rf_model, newdata = transaction_filtered)
+transaction_filtered$rf_residuals <- transaction_filtered$log_monthlySpend - transaction_filtered$rf_fitted
+
+# Calculate fitted values and residuals for the Heckman Correction model
+transaction_filtered$heckman_fitted <- predict(heckman_model, newdata = transaction_filtered)
+transaction_filtered$heckman_residuals <- transaction_filtered$log_monthlySpend - transaction_filtered$heckman_fitted
+```
+
+
+
+##  Create individual residual vs fitted plots
+```{r}
+plot_baseline <- ggplot(transaction_filtered, aes(x = baseline_fitted, y = baseline_residuals)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(title = "Baseline Model", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+
+plot_poly <- ggplot(transaction_filtered, aes(x = poly_fitted, y = poly_residuals)) +
+  geom_point(color = "red", alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(title = "Polynomial Model", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+
+plot_rf <- ggplot(transaction_filtered, aes(x = rf_fitted, y = rf_residuals)) +
+  geom_point(color = "green", alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(title = "Random Forest Model", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+
+plot_heckman <- ggplot(transaction_filtered, aes(x = heckman_fitted, y = heckman_residuals)) +
+  geom_point(color = "purple", alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(title = "Heckman Model", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+
+# Arrange the four plots in a 2x2 grid
+grid.arrange(plot_baseline, plot_poly, plot_rf, plot_heckman, ncol = 2)
+
+
+```
+
+
+
+
+## Other metrics for Model Comparisons
+```{r}
+# Function to evaluate models
+evaluate_model <- function(model, data) {
+  preds <- predict(model, newdata = data)
+  actual <- data$log_monthlySpend
+  mse <- mean((actual - preds)^2)
+  
+  return(data.frame(
+    Adjusted_R2 = summary(model)$adj.r.squared,
+    AIC = AIC(model),
+    BIC = BIC(model),
+    MSE = mse,
+    RSE = summary(model)$sigma,
+    Price_Coefficient = coef(model)["log_avgPrice"]
+  ))
+}
+
+# Collect performance metrics for all models
+model_comparison <- bind_rows(
+  evaluate_model(baseline_model, transaction_data) %>% mutate(Model = "Baseline (Probit)"),
+  evaluate_model(heckman_poly_model, transaction_data) %>% mutate(Model = "Polynomial Correction"),
+  evaluate_model(heckman_rf_model, transaction_data) %>% mutate(Model = "Random Forest Correction"),
+  evaluate_model(heckman_model, transaction_data) %>% mutate(Model = "Heckman Correction")
+)
+
+# Display results
+print(model_comparison)
+
+
+```
+
+Based on the evaluation metrics provided in the table, the **Polynomial Correction Model** is the best choice for further analysis. It has the highest **Adjusted R-squared (0.7066)**, indicating it explains the largest proportion of variance in monthly spending among all models. Additionally, it has the **lowest AIC (6920.855) and BIC (6957.045),** which suggests that it provides the best balance between model fit and complexity. 
+
+Furthermore, the **Mean Squared Error (MSE) of 0.5529** and **Residual Standard Error (RSE) of 0.7441** are the lowest among the models, meaning the Polynomial model offers better predictive accuracy and lower variability in its predictions. The price coefficient (-2.2254) suggests that it effectively captures the price sensitivity while minimizing bias compared to the Baseline model.
+
+The residual plot for the Polynomial Model (top right) shows some structure but has well-distributed residuals without extreme patterns, suggesting a reasonable fit as compared to the baseline model showing strong clustering, indicating bias, and the random forest model shows heteroscedasticity, which may indicate overfitting
+
+Given these factors, the **Polynomial Correction Model** is recommended for further analysis as it provides the most accurate and reliable estimates while appropriately correcting for selection bias.
+
+
+## Visualization: Price vs Spend by Enrollment Probability
+
+
+```{r}
+ggplot(transaction_data, aes(x = avgPrice, y = monthlySpend, color =predicted_enroll_poly)) +
+  geom_point(alpha = 0.5) +
+  labs(
+    title = "How Price Affects Customer Spending",
+    subtitle = "Customers who are more likely to enroll in the rewards program tend to spend more.",
+    x = "Average Coffee Price (USD)",
+    y = "Monthly Customer Spending (USD)",
+    color = "Enrollment Likelihood"
+  ) +
+  scale_color_gradient(low = "lightblue", high = "darkblue", labels = scales::percent_format(accuracy = 1)) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "right"
+  )
+
+```
+
+The graph above shows the relationship between average coffee price and monthly customer spending, highlighting the likelihood of enrollment in Starbucks' rewards program. The darker-colored points represent customers with a higher probability of enrollment, showing that they tend to have higher monthly spending levels. Conversely, customers with lower enrollment likelihood (lighter colors) generally spend less, indicating that loyalty program members may be less sensitive to price changes. This insight suggests that Starbucks can strategically adjust pricing and promotional efforts to attract and retain high-value customers, optimizing revenue while maintaining customer satisfaction
+
+
+
+## Boxplot: Monthly Spend Distribution by Enrollment Probability
+
+```{r}
+ggplot(transaction_data, aes(x = factor(predicted_enroll_poly > 0.5), y = monthlySpend, fill = factor(predicted_enroll_poly > 0.5))) +
+  geom_boxplot() +
+  labs(title = "Monthly Spend by Enrollment Probability",
+       x = "Likely Enrolled",
+       y = "Monthly Spend") +
+  theme_minimal()
+
+```
+
+The boxplot compares monthly spending between customers who are likely to enroll in the rewards program (TRUE) and those who are not (FALSE). Customers less likely to enroll tend to have a higher median monthly spend, while those likely to enroll have a lower median spend with a smaller interquartile range. Both groups have a similar spread of outliers, indicating that some customers in both categories exhibit high spending behavior. This suggests that Starbucks may need to focus on strategies to increase spending among likely enrollees.
+
+
+
+##  Revenue loss comparison: biased vs corrected models
+
+
+# Distribution of spending patterns across loyalty and non-loyalty customers
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+# Data transformation
+transaction_data <- transaction_data %>%
+  mutate(
+    biased_revenue_loss = monthlySpend * (1 + log_avgPrice * -1.8699 / 100),
+    corrected_revenue_loss = monthlySpend * (1 + log_avgPrice * -2.225355  / 100)
+  )
+
+# First plot: Monthly Spend Distribution by Enrollment Status
+plot1 <- ggplot(transaction_data, aes(x = monthlySpend, fill = factor(predicted_enroll_poly > 0.5))) +
+  geom_histogram(binwidth = 10, position = "dodge", alpha = 0.5) +
+  labs(
+     caption  = "Distribution of Monthly Spend by Enrollment Status",
+    x = "Monthly Coffee Expenditure",
+    y = "Customer Count"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("0" = "green", "1" = "orange"), labels = c("Non-Loyalty", "Loyalty")) +
+  theme_minimal(base_size = 10) +
+  theme(
+    
+    legend.position = "top"
+  ) +
+  guides(fill = guide_legend(title = "Revenue Loss "))
+
+
+# Second plot: Revenue Loss Comparison
+plot2 <- ggplot(transaction_data, aes(x = avgPrice)) +
+  geom_col(aes(y = biased_revenue_loss, fill = "Biased"), position = "identity", alpha = 0.5) +
+  geom_col(aes(y = corrected_revenue_loss, fill = "Corrected"), position = "identity", alpha = 0.5) +
+  labs(
+    caption = "Comparing estimated revenue losses based on biased 
+    and corrected price elasticity ",
+    x = "Average Coffee Price (USD)",
+    y = " Estimated Revenue Loss"
+  ) +
+  scale_fill_manual(values = c("Biased" = "red", "Corrected" = "blue")) +
+  theme_minimal(base_size = 10) +
+  theme(
+    
+    legend.position = "top"
+  ) +
+  guides(fill = guide_legend(title = "Revenue Loss Estimation"))
+
+# Arrange plots side by side
+plot2 + plot1 + plot_layout(ncol = 2)
+
+```
+The analysis above compares the projected revenue loss estimates based on log-log model(subject to self selection bias) and corrected polynomial price elasticity model across different average coffee prices. The red bars represent revenue loss projections using the biased model, while the blue bars represent the corrected model. The corrected model generally predicts higher revenue losses, highlighting that the biased model likely underestimates the impact of price changes on revenue. The overlap between the two models shows areas of agreement; however, the more significant differences suggest that failing to account for selection bias could lead to inaccurate pricing strategies. For Starbucks, these insights emphasize the importance of using the corrected model to make informed pricing decisions and minimize revenue loss across their stores.
+
+This chart shows the distribution of monthly spending, with most customers spending relatively low amounts. The data is skewed to the left, indicating a concentration of low spenders, while a few customers have significantly higher spending. Starbucks can use this insight to target low spenders with promotional offers to increase their spending and retain high-value customers.
+
+##  Comparison Table
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# Create a comparison dataframe
+model_comparison <- data.frame(
+  Model = c("Baseline (Probit)", "Polynomial Correction", "Random Forest Correction", "Heckman Correction"),
+  Adjusted_R2 = c(0.5668, 0.7066, 0.6993, 0.7048),
+  AIC = c(8118.878, 6920.855, 6996.141, 6939.349),
+  BIC = c(8149.037, 6957.045, 7032.331, 6975.540),
+  MSE = c(0.8166, 0.5529, 0.5666, 0.5562),
+  RSE = c(0.9043, 0.7441, 0.7533, 0.7464),
+  Price_Coefficient = c(-1.869957, -2.225355, -2.217123, -2.216345)
+)
+
+# Format table using kableExtra for better presentation
+kable(model_comparison, caption = "Model Performance Comparison", format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(0, background = "#D3D3D3", bold = TRUE)
+
+```
+
+
+The table shows that customer spending is highly sensitive to price changes, as indicated by the price coefficients across models. The Polynomial Correction model, with a coefficient of -2.225355, suggests that a 1% increase in price leads to a 2.23% decrease in monthly spending, the highest sensitivity among all models. This highlights the importance of carefully considering price adjustments to avoid significant revenue losses. Additionally, the Heckman and Random Forest models provide similar estimates, reinforcing the conclusion that price sensitivity is greater than initially estimated in the baseline model. Starbucks should leverage these insights to implement data-driven pricing strategies that balance revenue growth and customer retention.
+
+The other performance metrics in the table provide insights into model accuracy and reliability. Adjusted R² values indicate how well each model explains the variance in customer spending, with the Polynomial Correction model achieving the highest value (0.7066), suggesting it best captures the relationship between price and spending
+
+
+\`\`\`
+
